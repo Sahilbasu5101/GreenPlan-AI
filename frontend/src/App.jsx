@@ -9,11 +9,15 @@ import TechStackSection from './components/TechStackSection';
 import DemoNarrativeSection from './components/DemoNarrativeSection';
 import FooterSection from './components/FooterSection';
 import InteractiveDrawerModal from './components/InteractiveDrawerModal';
+import LoginModal from './components/LoginModal';
+import Dashboard from './components/Dashboard';
 
 export default function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerPillar, setDrawerPillar] = useState('greening');
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const sectionTitles = [
     'Overview',
@@ -31,6 +35,7 @@ export default function App() {
 
   // Scroll listener to update active section index
   useEffect(() => {
+    if (isLoggedIn) return;
     const handleScroll = () => {
       const sections = sectionTitles.map((_, i) => document.getElementById(`section-${i}`));
       const scrollPosition = window.scrollY + window.innerHeight * 0.35;
@@ -46,12 +51,12 @@ export default function App() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [sectionTitles.length]);
+  }, [sectionTitles.length, isLoggedIn]);
 
   // Keyboard navigation support (ArrowDown, ArrowUp, PageDown, PageUp)
   useEffect(() => {
+    if (isLoggedIn || isDrawerOpen || isLoginModalOpen) return;
     const handleKeyDown = (e) => {
-      if (isDrawerOpen) return;
       if (e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault();
         scrollToSection(Math.min(activeIndex + 1, sectionTitles.length - 1));
@@ -63,7 +68,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeIndex, isDrawerOpen, sectionTitles.length]);
+  }, [activeIndex, isDrawerOpen, isLoginModalOpen, isLoggedIn, sectionTitles.length]);
 
   const scrollToSection = (index) => {
     const target = document.getElementById(`section-${index}`);
@@ -76,6 +81,18 @@ export default function App() {
     setDrawerPillar(pillarId);
     setIsDrawerOpen(true);
   };
+
+  // If user is logged in, show the Decision Support Dashboard
+  if (isLoggedIn) {
+    return (
+      <Dashboard
+        onLogout={() => {
+          setIsLoggedIn(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-teal-100 selection:text-teal-900">
@@ -94,6 +111,7 @@ export default function App() {
           onExplore={() => scrollToSection(1)}
           onOpenDrawer={() => setIsDrawerOpen(true)}
           onNavigate={scrollToSection}
+          onOpenLogin={() => setIsLoginModalOpen(true)}
         />
 
         {/* Section 1: Divider Part 1 */}
@@ -168,6 +186,16 @@ export default function App() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         initialPillar={drawerPillar}
+      />
+
+      {/* Login Modal Popup */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={() => {
+          setIsLoginModalOpen(false);
+          setIsLoggedIn(true);
+        }}
       />
     </div>
   );
