@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowDown, Leaf, Sparkles, ArrowRight } from 'lucide-react';
 
-export default function HeroSection({ onExplore, onOpenDrawer, onNavigate }) {
+export default function HeroSection({ onExplore, onOpenDrawer, onNavigate, onOpenLogin }) {
   return (
     <section
       id="section-0"
@@ -102,7 +102,7 @@ export default function HeroSection({ onExplore, onOpenDrawer, onNavigate }) {
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3.5 mb-8">
           <button
-            onClick={onExplore}
+            onClick={onOpenLogin || onExplore}
             className="px-6 py-3.5 text-sm font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 group cursor-pointer"
           >
             <span>Explore Solution & Architecture</span>
